@@ -70,7 +70,7 @@ RUN ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo $TIME_ZONE > /
 COPY --from=builder /root/nginx-${version}/objs/ngx_http_brotli_filter_module.so /usr/lib/nginx/modules/
 COPY --from=builder /root/nginx-${version}/objs/ngx_http_brotli_static_module.so /usr/lib/nginx/modules/
 
-COPY ./dist /usr/share/nginx/html
+COPY ./build /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
 COPY ./frontend.conf /etc/nginx/conf.d
 COPY ./nginx.conf /etc/nginx/nginx.conf
