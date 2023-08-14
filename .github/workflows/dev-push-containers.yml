@@ -1,0 +1,45 @@
+name: Dev push containers
+env:
+    REACT_APP_BASE_URL: https://snehal-development.azurewebsites.net
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: 'Checkout GitHub Action'
+                uses: actions/checkout@v3
+                with:
+                    fetch-depth: 0
+            -   uses: Azure/login@v1.1
+                with:
+                    creds: ${{ secrets.AZURE_CREDENTIALS }}
+            -   uses: actions/checkout@v3
+                with:
+                    fetch-depth: 0
+            -   name: Set up Node.js
+                uses: actions/setup-node@v3
+                with:
+                    node-version: '18'
+            -   name: Install project dependencies
+                run: npm install
+            -   name: 'Build apps'
+                run: npm run build
+            -   name: 'Login via Azure CLI'
+                uses: azure/login@v1
+                with:
+                    creds: ${{ secrets.AZURE_CREDENTIALS }}
+            -   name: 'Build and push images'
+                uses: azure/docker-login@v1
+                with:
+                    login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+                    username: ${{ secrets.REGISTRY_USERNAME }}
+                    password: ${{ secrets.REGISTRY_PASSWORD }}
+            -   run: |
+                    docker build -f ./Dockerfile . -t '${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:latest'
+                    docker push '${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:latest'
